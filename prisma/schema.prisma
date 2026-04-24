@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pages    Page[]
+  projects Project[]
+  articles Article[]
+}
+
+model Page {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  summary     String
+  heroTitle   String
+  heroBody    String
+  content     Json
+  status      PublishStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  updatedById String?
+
+  updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  category    String
+  summary     String
+  challenge   String
+  solution    String
+  outcome     String
+  stack       String[]
+  deliverables String[]
+  coverImage  String?
+  status      PublishStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  updatedById String?
+
+  updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model Article {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  category    String
+  title       String
+  summary     String
+  body        Json
+  status      PublishStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  updatedById String?
+
+  updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model Asset {
+  id        String   @id @default(cuid())
+  fileName  String
+  url       String
+  alt       String?
+  mimeType  String
+  createdAt DateTime @default(now())
+}
