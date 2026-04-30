@@ -11,7 +11,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.28em] text-ink-500">
-            {project.status} / {project.year}
+            {project.phaseLabel} / {project.year}
           </p>
           <h3 className="font-display text-3xl text-ink-950">{project.name}</h3>
         </div>

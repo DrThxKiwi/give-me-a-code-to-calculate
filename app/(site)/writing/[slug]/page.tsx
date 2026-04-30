@@ -39,7 +39,7 @@ export default async function WritingDetailPage({
   const { slug } = await params;
   const entry = await getWritingEntryBySlug(slug);
 
-  if (!entry) {
+  if (!entry || entry.visibility !== "public") {
     notFound();
   }
 

@@ -1,16 +1,10 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-enum Role {
-  ADMIN
-  EDITOR
 }
 
 enum PublishStatus {
@@ -19,17 +13,17 @@ enum PublishStatus {
   ARCHIVED
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  role      Role     @default(ADMIN)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  pages    Page[]
-  projects Project[]
-  articles Article[]
+model SiteSettings {
+  id            String   @id @default("site")
+  brandName     String
+  brandBadge    String
+  footerSummary String
+  contactEmail  String
+  githubUrl     String
+  deployUrl     String
+  navigation    Json
+  footerLinks   Json
+  updatedAt     DateTime @updatedAt
 }
 
 model Page {
@@ -37,37 +31,33 @@ model Page {
   slug        String        @unique
   title       String
   summary     String
+  heroEyebrow String
   heroTitle   String
   heroBody    String
   content     Json
-  status      PublishStatus @default(DRAFT)
-  publishedAt DateTime?
+  status      PublishStatus @default(PUBLISHED)
+  updatedBy   String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  updatedById String?
-
-  updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
 }
 
 model Project {
-  id          String        @id @default(cuid())
-  slug        String        @unique
-  name        String
-  category    String
-  summary     String
-  challenge   String
-  solution    String
-  outcome     String
-  stack       String[]
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  name         String
+  category     String
+  summary      String
+  year         String
+  phaseLabel   String
+  stack        String[]
+  challenge    String
+  solution     String
+  outcome      String
   deliverables String[]
-  coverImage  String?
-  status      PublishStatus @default(DRAFT)
-  publishedAt DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  updatedById String?
-
-  updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+  status       PublishStatus @default(PUBLISHED)
+  updatedBy    String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Article {
@@ -76,14 +66,13 @@ model Article {
   category    String
   title       String
   summary     String
+  readTime    String
   body        Json
-  status      PublishStatus @default(DRAFT)
+  status      PublishStatus @default(PUBLISHED)
   publishedAt DateTime?
+  updatedBy   String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  updatedById String?
-
-  updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: SetNull)
 }
 
 model Asset {

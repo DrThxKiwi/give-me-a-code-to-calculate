@@ -40,7 +40,7 @@ export default async function ProjectDetailPage({
   const { slug } = await params;
   const project = await getProjectBySlug(slug);
 
-  if (!project) {
+  if (!project || project.visibility !== "public") {
     notFound();
   }
 
@@ -48,7 +48,7 @@ export default async function ProjectDetailPage({
     <section className="grid gap-8">
       <article className="section-frame panel rounded-[2rem] p-8 md:p-12">
         <p className="text-xs uppercase tracking-[0.34em] text-ink-500">
-          {project.category} / {project.status}
+          {project.category} / {project.phaseLabel}
         </p>
         <h1 className="mt-4 font-display text-5xl text-ink-950 sm:text-6xl">
           {project.name}

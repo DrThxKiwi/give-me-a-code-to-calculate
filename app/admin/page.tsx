@@ -1,7 +1,9 @@
 import { SectionHeading } from "@/components/section-heading";
+import { requireAdmin } from "@/lib/auth-helpers";
 import { getAdminOverview } from "@/lib/cms";
 
 export default async function AdminOverviewPage() {
+  await requireAdmin("/admin");
   const overview = await getAdminOverview();
 
   return (
@@ -10,14 +12,13 @@ export default async function AdminOverviewPage() {
         <p className="text-xs uppercase tracking-[0.34em] text-ink-500">
           ADMIN OVERVIEW
         </p>
-        <h1 className="mt-4 font-display text-5xl text-ink-950">后台骨架已就位</h1>
+        <h1 className="mt-4 font-display text-5xl text-ink-950">后台已经开始具备工作能力</h1>
         <p className="mt-4 max-w-3xl text-sm leading-8 text-ink-700">
-          这里先把未来需要编辑的内容集合和工作流展示出来。下一步接 Auth.js
-          与 Prisma 后，这些页面就可以逐步变成真正可编辑的后台。
+          现在这里已经不再只是一个样板页。你可以把它继续接到数据库和 Auth.js 上，然后通过表单真正维护站点内容。
         </p>
       </section>
 
-      <section className="grid gap-6 md:grid-cols-3">
+      <section className="grid gap-6 md:grid-cols-4">
         <article className="panel rounded-[1.75rem] p-6">
           <p className="text-sm uppercase tracking-[0.28em] text-ink-500">页面数量</p>
           <p className="mt-4 font-display text-5xl text-ink-950">
@@ -25,15 +26,23 @@ export default async function AdminOverviewPage() {
           </p>
         </article>
         <article className="panel rounded-[1.75rem] p-6">
-          <p className="text-sm uppercase tracking-[0.28em] text-ink-500">项目集合</p>
+          <p className="text-sm uppercase tracking-[0.28em] text-ink-500">项目数量</p>
           <p className="mt-4 font-display text-5xl text-ink-950">
             {overview.projectCount}
           </p>
         </article>
         <article className="panel rounded-[1.75rem] p-6">
-          <p className="text-sm uppercase tracking-[0.28em] text-ink-500">文章集合</p>
+          <p className="text-sm uppercase tracking-[0.28em] text-ink-500">文章数量</p>
           <p className="mt-4 font-display text-5xl text-ink-950">
             {overview.articleCount}
+          </p>
+        </article>
+        <article className="panel rounded-[1.75rem] p-6">
+          <p className="text-sm uppercase tracking-[0.28em] text-ink-500">运行状态</p>
+          <p className="mt-4 text-sm leading-7 text-ink-700">
+            {overview.authConfigured ? "登录已配置" : "登录未配置"}
+            <br />
+            {overview.databaseConfigured ? "数据库已配置" : "数据库未配置"}
           </p>
         </article>
       </section>
@@ -80,12 +89,12 @@ export default async function AdminOverviewPage() {
           <p className="text-xs uppercase tracking-[0.3em] text-ink-500">
             NEXT INTEGRATIONS
           </p>
-          <h2 className="mt-4 font-display text-4xl text-ink-950">下一步接什么</h2>
+          <h2 className="mt-4 font-display text-4xl text-ink-950">你接下来要做什么</h2>
           <div className="mt-6 space-y-4 text-sm leading-7 text-ink-700">
-            <p>1. Auth.js：保护后台入口，只允许管理员访问。</p>
-            <p>2. Prisma + PostgreSQL：把页面、项目、文章数据入库。</p>
-            <p>3. Vercel Blob：为项目封面、个人头像和文章配图做上传。</p>
-            <p>4. Server Actions：让后台表单真正写入内容。</p>
+            <p>1. 在 Vercel 设置 DATABASE_URL 并执行数据库初始化。</p>
+            <p>2. 配置 AUTH_SECRET、ADMIN_EMAIL、ADMIN_PASSWORD_HASH。</p>
+            <p>3. 登录后台后开始维护页面、项目和文章。</p>
+            <p>4. 下一阶段再继续接 Vercel Blob 做图片上传。</p>
           </div>
         </article>
       </section>

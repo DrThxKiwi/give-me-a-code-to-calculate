@@ -2,28 +2,28 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/page-hero";
 import { SectionHeading } from "@/components/section-heading";
-import { getAllWritingEntries } from "@/lib/cms";
+import { getWritingPageData } from "@/lib/cms";
 
 export const metadata: Metadata = {
   title: "随笔"
 };
 
 export default async function WritingPage() {
-  const entries = await getAllWritingEntries();
+  const { page, entries } = await getWritingPageData();
 
   return (
     <>
       <PageHero
-        eyebrow="WRITING"
-        title="个人主页也需要长期内容输出"
-        description="文章区可以放建站记录、学习总结和项目复盘。现在先用静态数据组织，后面可以直接接数据库或富文本编辑。"
+        eyebrow={page.heroEyebrow}
+        title={page.heroTitle}
+        description={page.heroBody}
       />
 
       <section className="space-y-8">
         <SectionHeading
           eyebrow="LATEST ENTRIES"
           title="当前文章结构"
-          description="先建立列表页和详情页的心智模型，后面后台编辑时就有明确目标。"
+          description={page.summary}
         />
         <div className="grid gap-6 lg:grid-cols-2">
           {entries.map((entry) => (
