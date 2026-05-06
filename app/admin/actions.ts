@@ -21,7 +21,7 @@ function redirectWithMessage(
   path: string,
   kind: "success" | "error",
   message: string
-) {
+): never {
   const url = new URL(`http://local${path}`);
   url.searchParams.set(kind, message);
   redirect(`${url.pathname}${url.search}`);
@@ -29,7 +29,7 @@ function redirectWithMessage(
 
 function ensureDatabase() {
   if (!isDatabaseConfigured()) {
-    throw new Error("当前还没有配置 DATABASE_URL，暂时不能保存到数据库。");
+    throw new Error("DATABASE_URL is not configured yet.");
   }
 }
 
@@ -37,8 +37,15 @@ function readFormValue(formData: FormData, key: string) {
   return String(formData.get(key) ?? "");
 }
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
+
 export async function saveSiteSettingsAction(formData: FormData) {
   await requireAdmin("/admin/settings");
+
+  let kind: "success" | "error" = "success";
+  let message = "Site settings saved.";
 
   try {
     ensureDatabase();
@@ -64,8 +71,8 @@ export async function saveSiteSettingsAction(formData: FormData) {
         contactEmail: parsed.contactEmail,
         githubUrl: parsed.githubUrl,
         deployUrl: parsed.deployUrl,
-        navigation: parseNavItems(parsed.navigationJson, "导航 JSON"),
-        footerLinks: parseNavItems(parsed.footerLinksJson, "页脚链接 JSON")
+        navigation: parseNavItems(parsed.navigationJson, "navigation JSON"),
+        footerLinks: parseNavItems(parsed.footerLinksJson, "footer links JSON")
       },
       update: {
         brandName: parsed.brandName,
@@ -74,23 +81,26 @@ export async function saveSiteSettingsAction(formData: FormData) {
         contactEmail: parsed.contactEmail,
         githubUrl: parsed.githubUrl,
         deployUrl: parsed.deployUrl,
-        navigation: parseNavItems(parsed.navigationJson, "导航 JSON"),
-        footerLinks: parseNavItems(parsed.footerLinksJson, "页脚链接 JSON")
+        navigation: parseNavItems(parsed.navigationJson, "navigation JSON"),
+        footerLinks: parseNavItems(parsed.footerLinksJson, "footer links JSON")
       }
     });
 
     revalidatePath("/", "layout");
     revalidatePath("/contact");
-    redirectWithMessage("/admin/settings", "success", "站点设置已保存。");
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "保存站点设置时出现未知错误。";
-    redirectWithMessage("/admin/settings", "error", message);
+    kind = "error";
+    message = getErrorMessage(error, "Failed to save site settings.");
   }
+
+  redirectWithMessage("/admin/settings", kind, message);
 }
 
 export async function savePageAction(formData: FormData) {
   await requireAdmin("/admin/pages");
+
+  let kind: "success" | "error" = "success";
+  let message = "";
 
   try {
     ensureDatabase();
@@ -137,15 +147,20 @@ export async function savePageAction(formData: FormData) {
       revalidatePath(`/${parsed.slug}`);
     }
 
-    redirectWithMessage("/admin/pages", "success", `页面 ${parsed.slug} 已保存。`);
+    message = `Page ${parsed.slug} saved.`;
   } catch (error) {
-    const message = error instanceof Error ? error.message : "保存页面时出现未知错误。";
-    redirectWithMessage("/admin/pages", "error", message);
+    kind = "error";
+    message = getErrorMessage(error, "Failed to save page.");
   }
+
+  redirectWithMessage("/admin/pages", kind, message);
 }
 
 export async function saveProjectAction(formData: FormData) {
   await requireAdmin("/admin/projects");
+
+  let kind: "success" | "error" = "success";
+  let message = "";
 
   try {
     ensureDatabase();
@@ -200,35 +215,45 @@ export async function saveProjectAction(formData: FormData) {
 
     revalidatePath("/projects");
     revalidatePath(`/projects/${parsed.slug}`);
-    redirectWithMessage("/admin/projects", "success", `项目 ${parsed.slug} 已保存。`);
+    message = `Project ${parsed.slug} saved.`;
   } catch (error) {
-    const message = error instanceof Error ? error.message : "保存项目时出现未知错误。";
-    redirectWithMessage("/admin/projects", "error", message);
+    kind = "error";
+    message = getErrorMessage(error, "Failed to save project.");
   }
+
+  redirectWithMessage("/admin/projects", kind, message);
 }
 
 export async function deleteProjectAction(formData: FormData) {
   await requireAdmin("/admin/projects");
+
+  let kind: "success" | "error" = "success";
+  let message = "";
 
   try {
     ensureDatabase();
     const slug = readFormValue(formData, "slug");
 
     if (!slug) {
-      throw new Error("缺少要删除的项目 slug。");
+      throw new Error("Missing project slug.");
     }
 
     await prisma.project.delete({ where: { slug } });
     revalidatePath("/projects");
-    redirectWithMessage("/admin/projects", "success", `项目 ${slug} 已删除。`);
+    message = `Project ${slug} deleted.`;
   } catch (error) {
-    const message = error instanceof Error ? error.message : "删除项目时出现未知错误。";
-    redirectWithMessage("/admin/projects", "error", message);
+    kind = "error";
+    message = getErrorMessage(error, "Failed to delete project.");
   }
+
+  redirectWithMessage("/admin/projects", kind, message);
 }
 
 export async function saveArticleAction(formData: FormData) {
   await requireAdmin("/admin/writing");
+
+  let kind: "success" | "error" = "success";
+  let message = "";
 
   try {
     ensureDatabase();
@@ -271,29 +296,36 @@ export async function saveArticleAction(formData: FormData) {
 
     revalidatePath("/writing");
     revalidatePath(`/writing/${parsed.slug}`);
-    redirectWithMessage("/admin/writing", "success", `文章 ${parsed.slug} 已保存。`);
+    message = `Article ${parsed.slug} saved.`;
   } catch (error) {
-    const message = error instanceof Error ? error.message : "保存文章时出现未知错误。";
-    redirectWithMessage("/admin/writing", "error", message);
+    kind = "error";
+    message = getErrorMessage(error, "Failed to save article.");
   }
+
+  redirectWithMessage("/admin/writing", kind, message);
 }
 
 export async function deleteArticleAction(formData: FormData) {
   await requireAdmin("/admin/writing");
+
+  let kind: "success" | "error" = "success";
+  let message = "";
 
   try {
     ensureDatabase();
     const slug = readFormValue(formData, "slug");
 
     if (!slug) {
-      throw new Error("缺少要删除的文章 slug。");
+      throw new Error("Missing article slug.");
     }
 
     await prisma.article.delete({ where: { slug } });
     revalidatePath("/writing");
-    redirectWithMessage("/admin/writing", "success", `文章 ${slug} 已删除。`);
+    message = `Article ${slug} deleted.`;
   } catch (error) {
-    const message = error instanceof Error ? error.message : "删除文章时出现未知错误。";
-    redirectWithMessage("/admin/writing", "error", message);
+    kind = "error";
+    message = getErrorMessage(error, "Failed to delete article.");
   }
+
+  redirectWithMessage("/admin/writing", kind, message);
 }
