@@ -5,12 +5,8 @@ import { signIn } from "@/auth";
 import { isAuthConfigured } from "@/lib/env";
 import { loginFormSchema } from "@/lib/validators";
 
-export type LoginFormState = {
+type LoginFormState = {
   error: string | null;
-};
-
-export const initialLoginFormState: LoginFormState = {
-  error: null
 };
 
 export async function authenticateAdmin(
@@ -42,7 +38,8 @@ export async function authenticateAdmin(
       password: parsed.data.password,
       redirectTo: parsed.data.callbackUrl
     });
-    return initialLoginFormState;
+
+    return { error: null };
   } catch (error) {
     if (error instanceof AuthError) {
       return {

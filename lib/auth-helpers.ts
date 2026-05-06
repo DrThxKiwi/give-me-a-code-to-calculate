@@ -7,7 +7,12 @@ export async function getAdminSession() {
     return null;
   }
 
-  return auth();
+  try {
+    return await auth();
+  } catch (error) {
+    console.error("Failed to read admin session:", error);
+    return null;
+  }
 }
 
 export async function requireAdmin(callbackUrl = "/admin") {

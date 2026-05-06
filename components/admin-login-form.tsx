@@ -1,14 +1,19 @@
 "use client";
 
 import { useActionState } from "react";
-import {
-  authenticateAdmin,
-  initialLoginFormState
-} from "@/app/admin/login/actions";
+import { authenticateAdmin } from "@/app/admin/login/actions";
+
+type LoginFormState = {
+  error: string | null;
+};
 
 type AdminLoginFormProps = {
   callbackUrl: string;
   disabled: boolean;
+};
+
+const initialLoginFormState: LoginFormState = {
+  error: null
 };
 
 export function AdminLoginForm({
